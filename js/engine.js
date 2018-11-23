@@ -4,8 +4,55 @@ function search(){
     
     var search_string = $('#search-string').val()
 
-    baiduSequence(search_string)
-    dangdangSequence(search_string)
+    // baiduSequence(search_string)
+    // dangdangSequence(search_string)
+    jdSequence(search_string)
+}
+
+function jdSequence(search_string){
+    sendMessage('正在查询京东 ...')
+
+    queryJD('http://s-e.jd.com/Search?enc=utf-8&key='+search_string, function(res){
+        // alert(res)
+        // var $DOMResult = $(res)
+        // alert($DOMResult.html())
+        // var item_ls = $DOMResult.filter('.gl-item')
+        // $.each(item_ls, function(i, item){
+        //     $('#result').append(item)
+        // })
+        $('#buffer').append(res)
+        $.each($('#J_goodsList .gl-item'), function(i, item){
+            $('#result').append(item)
+        })
+        $('#buffer').empty()
+    
+        // var total = res.data.totalCount
+
+        // if(total!=0){
+        //     sendMessage('在京东搜索到'+total+'个结果，正在全数打印')
+        //     queryDangdang('http://e.dangdang.com/media/api.go?action=searchMedia&mediaTypes=1%2C2&keyword='+search_string+'&end='+total, function(res_again){
+        //         dangdangOutput(res_again)
+        //     })
+        // }
+        // else{
+        //     sendMessage('在京东未查到结果')
+        // }
+
+        sendMessage('京东检索完毕')
+    })
+}
+
+function queryJD(search_url, successCallback){
+    $.get({
+        type: 'get',
+        url: search_url,
+        success: function(res){
+            successCallback(res)
+        },
+        error: function(){
+            sendMessage('京东书籍数据请求失败')
+        }
+    })
 }
 
 function dangdangSequence(search_string){
