@@ -1,0 +1,27 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>EBook Comparer</title>
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/engine.js"></script>
+    <style>
+        * {
+            font-family: 'Microsoft Yahei'
+        }
+
+        em {
+            font-weight: bold;
+            font-style: normal;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div><input type="text" id="search-string" width="100%" placeholder="请输入你要找的电子书名"></div>
+    <div id="control"><button onclick="search()">开始比价</button></div>
+    <div><dl id="result"></dl></div>
+    <div id="raw"></div>
+</body>
+</html>
