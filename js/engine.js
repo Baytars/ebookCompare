@@ -4,9 +4,9 @@ function search(){
     
     var search_string = $('#search-string').val()
 
-    // baiduSequence(search_string)
+    baiduSequence(search_string)
     // dangdangSequence(search_string)
-    jdSequence(search_string)
+    // jdSequence(search_string)
 }
 
 function jdSequence(search_string){
@@ -25,9 +25,25 @@ function jdSequence(search_string){
                 price_tags.push(item.getAttribute('id'))
             })
             queryJD('http://p.3.cn/prices/mgets?skuids='+price_tags.join(','), function(res_again){
+                sendMessage('正在打印第1-30个结果')
                 JDOutput(res_again)
-                $('#jd-buffer-1').empty()
-                $('#jd-buffer-2').empty()
+                
+                for(i=0;((i+1)*30)<total;i++){
+                    var page_count = i+2
+                    var min = (i+1)*30 + 1
+                    var max = page_count*30
+                    sendMessage('正在打印第'+min+'-'+max+'个结果')
+                    queryJD('http://s-e.jd.com/Search?enc=utf-8&key='+search_string+'&page='+page_count, function(res_3rd){
+                        $('#jd-buffer-1').append(res_3rd)
+                        price_tags = new Array()
+                        $.each($('.p-price strong'), function(n, item){
+                            price_tags.push(item.getAttribute('id'))
+                        })
+                        queryJD('http://p.3.cn/prices/mgets?skuids='+price_tags.join(','), function(res_4th){
+                            JDOutput(res_4th)
+                        })
+                    })
+                }
             })
         }
         else{
@@ -73,6 +89,10 @@ function JDOutput(res){
             "<div>" + "<label>" + "作者/出版社" + "：</label>" + item.getElementsByClassName('p-bi-name')[0].innerText + "</div>" +
             "</li>"
         )
+
+        $('#jd-buffer-1').empty()
+        $('#jd-buffer-2').empty()
+
     })
 }
 
@@ -193,7 +213,7 @@ function baiduOutput(res){
     
         $('#result').append(
             "<li>" +
-            "<div>" + "<label>" + "来源" + "：</label>" + "当当" + "</div>" +
+            "<div>" + "<label>" + "来源" + "：</label>" + "百度" + "</div>" +
             "<div>" + item.title + "</div>" +
             "<div>" + "<label>" + "价格" + "：</label>" + item.price + "</div>" +
             "<div>" + "<label>" + "电子价格" + "：</label>" + item.e_price + "</div>" +
