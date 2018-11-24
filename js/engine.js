@@ -17,56 +17,62 @@ function jdSequence(search_string){
     queryJD('http://s-e.jd.com/Search?enc=utf-8&key='+search_string, function(res){
         $('#jd-buffer-1').append(res)
         var total = Number($('.num:first').text())
-        sendMessage('在京东搜索到'+total+'个结果')
-        $.each($('#J_goodsList .gl-item'), function(i, item){
-            $('#jd-buffer-2').append(item)
-
-            var img_ele = document.createElement('img')
-            var img_div = item.getElementsByClassName('p-img')[0]
-            var img_tag = img_div.getElementsByTagName('img')[0]
-            // alert(img_tag.getAttribute('src')+item.innerHTML)
-
-            img_ele_src = img_tag.getAttribute('src')
-            // Neither img_tag['src'] nor img_tag.src will get the complete image url.
-            if(img_ele_src==null){
-                img_ele.src = 'http:'+ img_tag.getAttribute('data-lazy-img')
-            }
-            else{
-                img_ele.src = 'http:'+ img_ele_src
-            }
-
-            var title_div = item.getElementsByClassName('p-name')[0]
-            var title_tag = title_div.getElementsByTagName('em')[0]
-
-            $('#result').append(
-                "<li>" +
-                "<div>" + "<label>" + "来源" + "：</label>" + "京东" + "</div>" +
-                "<div>" + title_tag.innerText + "</div>" +
-                // "<div>" + "<label>" + "销售价" + "：</label>" + item.salePrice + "</div>" +
-                // "<div>" + "<label>" + "电子价格" + "：</label>" + item.lowestPrice + "</div>" +
-                "<div>" + img_ele.outerHTML  + "</div>" +
-                "<div>" + "<label>" + "摘要" + "：</label>" + item.getElementsByClassName('promo-words')[0].innerText + "</div>" +
-                "<div>" + "<label>" + "作者" + "：</label>" + item.getElementsByClassName('p-bi-name')[0].innerText + "</div>" +
-                //"<div>" + "<label>" + "出版社" + "：</label>" + item.publisher + "</div>" +
-                "</li>"
-            )
-        })
-        $('#jd-buffer-1').empty()
-        $('#jd-buffer-2').empty()
-    
-        // var total = res.data.totalCount
-
-        // if(total!=0){
-        //     sendMessage('在京东搜索到'+total+'个结果，正在全数打印')
-        //     queryDangdang('http://e.dangdang.com/media/api.go?action=searchMedia&mediaTypes=1%2C2&keyword='+search_string+'&end='+total, function(res_again){
-        //         dangdangOutput(res_again)
-        //     })
-        // }
-        // else{
-        //     sendMessage('在京东未查到结果')
-        // }
+        if(total!=0){
+            sendMessage('在京东搜索到'+total+'个结果')
+            // query price first
+            var price_tags = new Array()
+            $.each($('.p-price strong'), function(i, item){
+                price_tags.push(item.getAttribute('id'))
+            })
+            queryJD('http://p.3.cn/prices/mgets?skuids='+price_tags.join(','), function(res_again){
+                JDOutput(res_again)
+                $('#jd-buffer-1').empty()
+                $('#jd-buffer-2').empty()
+            })
+        }
+        else{
+            sendMessage('在京东未查到结果')
+        }
 
         sendMessage('京东检索完毕')
+    })
+}
+
+function JDOutput(res){
+    $.each($('#J_goodsList .gl-item'), function(i, item){
+        $('#jd-buffer-2').append(item)
+
+        var img_ele = document.createElement('img')
+        var img_div = item.getElementsByClassName('p-img')[0]
+        var img_tag = img_div.getElementsByTagName('img')[0]
+        // alert(img_tag.getAttribute('src')+item.innerHTML)
+
+        img_ele_src = img_tag.getAttribute('src')
+        // Neither img_tag['src'] nor img_tag.src will get the complete image url.
+        if(img_ele_src==null){
+            img_ele.src = 'http:'+ img_tag.getAttribute('data-lazy-img')
+        }
+        else{
+            img_ele.src = 'http:'+ img_ele_src
+        }
+
+        var title_div = item.getElementsByClassName('p-name')[0]
+        var title_tag = title_div.getElementsByTagName('em')[0]
+
+        // alert(i)
+        
+        $('#result').append(
+            "<li>" +
+            "<div>" + "<label>" + "来源" + "：</label>" + "京东" + "</div>" +
+            "<div>" + title_tag.innerText + "</div>" +
+            "<div>" + "<label>" + "现价" + "：</label>" + res[i]['p'] + "</div>" +
+            "<div>" + "<label>" + "纸书价格" + "：</label>" + res[i]['m'] + "</div>" +
+            "<div>" + "<label>" + "原价" + "：</label>" + res[i]['op'] + "</div>" +
+            "<div>" + img_ele.outerHTML  + "</div>" +
+            "<div>" + "<label>" + "摘要" + "：</label><br>" + item.getElementsByClassName('promo-words')[0].innerText + "</div>" +
+            "<div>" + "<label>" + "作者/出版社" + "：</label>" + item.getElementsByClassName('p-bi-name')[0].innerText + "</div>" +
+            "</li>"
+        )
     })
 }
 
