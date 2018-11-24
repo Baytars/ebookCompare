@@ -10,21 +10,49 @@ function search(){
 }
 
 function jdSequence(search_string){
+    $('#jd-buffer-1').empty()
+    $('#jd-buffer-2').empty()
     sendMessage('正在查询京东 ...')
 
     queryJD('http://s-e.jd.com/Search?enc=utf-8&key='+search_string, function(res){
-        // alert(res)
-        // var $DOMResult = $(res)
-        // alert($DOMResult.html())
-        // var item_ls = $DOMResult.filter('.gl-item')
-        // $.each(item_ls, function(i, item){
-        //     $('#result').append(item)
-        // })
-        $('#buffer').append(res)
+        $('#jd-buffer-1').append(res)
+        var total = Number($('.num:first').text())
+        sendMessage('在京东搜索到'+total+'个结果')
         $.each($('#J_goodsList .gl-item'), function(i, item){
-            $('#result').append(item)
+            $('#jd-buffer-2').append(item)
+
+            var img_ele = document.createElement('img')
+            var img_div = item.getElementsByClassName('p-img')[0]
+            var img_tag = img_div.getElementsByTagName('img')[0]
+            // alert(img_tag.getAttribute('src')+item.innerHTML)
+
+            img_ele_src = img_tag.getAttribute('src')
+            // Neither img_tag['src'] nor img_tag.src will get the complete image url.
+            if(img_ele_src==null){
+                img_ele.src = 'http:'+ img_tag.getAttribute('data-lazy-img')
+            }
+            else{
+                img_ele.src = 'http:'+ img_ele_src
+            }
+
+            var title_div = item.getElementsByClassName('p-name')[0]
+            var title_tag = title_div.getElementsByTagName('em')[0]
+
+            $('#result').append(
+                "<li>" +
+                "<div>" + "<label>" + "来源" + "：</label>" + "京东" + "</div>" +
+                "<div>" + title_tag.innerText + "</div>" +
+                // "<div>" + "<label>" + "销售价" + "：</label>" + item.salePrice + "</div>" +
+                // "<div>" + "<label>" + "电子价格" + "：</label>" + item.lowestPrice + "</div>" +
+                "<div>" + img_ele.outerHTML  + "</div>" +
+                "<div>" + "<label>" + "摘要" + "：</label>" + item.getElementsByClassName('promo-words')[0].innerText + "</div>" +
+                "<div>" + "<label>" + "作者" + "：</label>" + item.getElementsByClassName('p-bi-name')[0].innerText + "</div>" +
+                //"<div>" + "<label>" + "出版社" + "：</label>" + item.publisher + "</div>" +
+                "</li>"
+            )
         })
-        $('#buffer').empty()
+        $('#jd-buffer-1').empty()
+        $('#jd-buffer-2').empty()
     
         // var total = res.data.totalCount
 
